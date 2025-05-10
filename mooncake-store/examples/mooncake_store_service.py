@@ -5,47 +5,9 @@ import argparse
 import asyncio
 import json
 import logging
-import os
 from aiohttp import web
 from mooncake.store import MooncakeDistributedStore
-
-class MooncakeStoreConfig:
-    def __init__(self, local_hostname: str, metadata_server: str,
-                 global_segment_size: int = 3355443200,
-                 local_buffer_size: int = 1073741824,
-                 protocol: str = "tcp",
-                 device_name: str = "",
-                 master_server_address: str = ""):
-        self.local_hostname = local_hostname
-        self.metadata_server = metadata_server
-        self.global_segment_size = global_segment_size
-        self.local_buffer_size = local_buffer_size
-        self.protocol = protocol
-        self.device_name = device_name
-        self.master_server_address = master_server_address
-
-    @staticmethod
-    def from_file(file_path: str) -> 'MooncakeStoreConfig':
-        """Load config from JSON file"""
-        with open(file_path) as f:
-            config = json.load(f)
-            return MooncakeStoreConfig(
-                local_hostname=config.get("local_hostname"),
-                metadata_server=config.get("metadata_server"),
-                global_segment_size=config.get("global_segment_size", 3355443200),
-                local_buffer_size=config.get("local_buffer_size", 1073741824),
-                protocol=config.get("protocol", "tcp"),
-                device_name=config.get("device_name", ""),
-                master_server_address=config.get("master_server_address", "")
-            )
-
-    @staticmethod
-    def load_from_env() -> 'MooncakeStoreConfig':
-        """Load config from environment variable"""
-        config_file = os.getenv('MOONCAKE_CONFIG_PATH')
-        if not config_file:
-            raise ValueError("MOONCAKE_CONFIG_PATH environment variable not set")
-        return MooncakeStoreConfig.from_file(config_file)
+from mooncake.mooncake_config import MooncakeConfig
 
 class MooncakeService:
     def __init__(self, config_path: str = None):
@@ -55,9 +17,9 @@ class MooncakeService:
 
         try:
             if config_path:
-                self.config = MooncakeStoreConfig.from_file(config_path)
+                self.config = MooncakeConfig.from_file(config_path)
             else:
-                self.config = MooncakeStoreConfig.load_from_env()
+                self.config = MooncakeConfig.load_from_env()
             logging.info("Mooncake configuration loaded")
         except Exception as e:
             logging.error("Configuration load failed: %s", e)
