@@ -9,7 +9,7 @@ from aiohttp import web
 from mooncake.store import MooncakeDistributedStore
 from mooncake.mooncake_config import MooncakeConfig
 
-class MooncakeService:
+class MooncakeStoreService:
     def __init__(self, config_path: str = None):
         self.store = None
         self.config = None
@@ -212,7 +212,7 @@ def parse_arguments():
 
 async def main():
     args = parse_arguments()
-    service = MooncakeService(args.config)
+    service = MooncakeStoreService(args.config)
 
     try:
         if not await service.start_store_service():
